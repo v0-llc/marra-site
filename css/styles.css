@@ -260,7 +260,7 @@ h3 {
     bottom: clamp(1.5rem, 4vw, 3rem);
     left: clamp(1.25rem, 4vw, 3rem);
     z-index: 2;
-    max-width: min(22rem, 80vw);
+    max-width: min(32rem, 85vw);
     margin: 0;
     padding: 0;
     font-size: clamp(0.9rem, 1.4vw, 1.05rem);
