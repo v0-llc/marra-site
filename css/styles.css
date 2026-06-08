@@ -42,9 +42,7 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --transition-base: 0.35s var(--ease-out);
 
-  --client-image-size: clamp(14rem, 28vw, 25rem);
-  --client-track-gap: clamp(3rem, 8vw, 6rem);
-  --client-slot-width: calc(var(--client-image-size) + clamp(10rem, 18vw, 15rem));
+  --client-grid-gap: clamp(0.75rem, 1.5vw, 1.25rem);
 }
 
 /* ------------------------------------------------------------------ */
@@ -175,7 +173,7 @@ h3 {
 
 @keyframes hero-image-focus {
   from {
-    filter: blur(14px);
+    filter: blur(28px);
     transform: scale(1.04);
   }
 
@@ -235,7 +233,7 @@ h3 {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: min(88vw, 42rem);
+    width: min(88vw, 60rem);
     padding: var(--space-md);
   }
 
@@ -257,67 +255,34 @@ h3 {
 }
 
 /* ------------------------------------------------------------------ */
-/* Clients ? horizontal scroll section                                */
+/* Clients ? grid section                                             */
 /* ------------------------------------------------------------------ */
 
 .clients {
   background-color: var(--color-cream);
+  padding-block: calc(var(--header-height) + var(--space-md));
+  padding-inline: clamp(1.25rem, 4vw, 3rem);
 
-  .clients__scroll-wrapper {
-    position: relative;
+  .clients__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--client-grid-gap);
+    max-width: 80rem;
+    margin: 0 auto;
   }
+}
 
-  .clients__sticky {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-  }
-
-  .clients__about {
-    position: absolute;
-    bottom: clamp(1.5rem, 4vw, 3rem);
-    left: clamp(1.25rem, 4vw, 3rem);
-    z-index: 2;
-    max-width: min(32rem, 85vw);
-    margin: 0;
-    padding: 0;
-    font-size: clamp(0.9rem, 1.4vw, 1.05rem);
-    line-height: 1.65;
-    color: var(--color-forest);
-    opacity: 0;
-    transition: opacity 0.6s var(--ease-out);
-    pointer-events: none;
-
-    &.is-visible {
-      opacity: 1;
-    }
-  }
-
-  .clients__track {
-    display: flex;
-    align-items: center;
-    gap: var(--client-track-gap);
-    padding-left: var(--client-edge-padding, 0px);
-    padding-right: var(--client-edge-padding, 0px);
-    will-change: transform;
+@media (min-width: 64rem) {
+  .clients .clients__grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
 .client-card {
-  flex: 0 0 var(--client-slot-width);
-  width: var(--client-slot-width);
-  display: flex;
-  align-items: center;
-  gap: clamp(1rem, 2vw, 1.5rem);
+  min-width: 0;
 
   .client-card__slideshow {
     position: relative;
-    flex: 0 0 auto;
-    width: var(--client-image-size);
     aspect-ratio: 1;
     overflow: hidden;
     background-color: var(--color-sand);
@@ -331,25 +296,38 @@ h3 {
     max-width: none;
     object-fit: cover;
     opacity: 0;
-    transition: transform 0.8s var(--ease-out);
+    transition:
+      opacity 0.35s var(--ease-out),
+      transform 0.8s var(--ease-out);
 
     &.is-active {
       opacity: 1;
     }
   }
 
-  &:hover .client-card__slide.is-active {
+  &:hover .client-card__slide.is-active,
+  &:focus-within .client-card__slide.is-active {
     transform: scale(1.04);
   }
 
   .client-card__name {
-    flex: 1 1 auto;
-    min-width: 0;
-    font-size: clamp(1.1rem, 2vw, 1.5rem);
-    letter-spacing: 0.06em;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+    margin: 0;
+    padding: clamp(0.75rem, 2vw, 1.25rem);
+    font-size: clamp(0.7rem, 1.4vw, 0.95rem);
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-forest-deep);
-    white-space: nowrap;
+    color: var(--color-cream);
+    background: linear-gradient(
+      180deg,
+      rgb(29 38 18 / 0) 40%,
+      rgb(29 38 18 / 0.65) 100%
+    );
+    pointer-events: none;
   }
 }
 
@@ -531,23 +509,6 @@ h3 {
 /* ------------------------------------------------------------------ */
 
 @media (max-width: 40rem) {
-  .client-card {
-    flex: 0 0 calc(var(--client-image-size) + var(--client-track-gap));
-    width: calc(var(--client-image-size) + var(--client-track-gap));
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-sm);
-
-    .client-card__name {
-      white-space: normal;
-    }
-  }
-
-  .clients__about {
-    max-width: calc(100% - 2.5rem);
-    font-size: 0.85rem;
-  }
-
   .contact-chip {
     left: 50%;
     right: auto;

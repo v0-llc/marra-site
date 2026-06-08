@@ -2,14 +2,9 @@
   "use strict";
 
   const SLIDE_INTERVAL_MS = 400;
-  const FOCUS_THRESHOLD = 0.35;
 
   const header = document.querySelector(".site-header");
   const hero = document.querySelector(".hero");
-  const scrollWrapper = document.querySelector(".clients__scroll-wrapper");
-  const stickyPanel = document.querySelector(".clients__sticky");
-  const track = document.querySelector(".clients__track");
-  const aboutText = document.querySelector(".clients__about");
   const aboutSection = document.querySelector(".about");
   const aboutContent = document.querySelector(".about__content");
   const yearEl = document.getElementById("year");
@@ -49,7 +44,7 @@
     }
 
     start() {
-      if (this.slides.length <= 1) {
+      if (prefersReducedMotion || this.slides.length <= 1) {
         return;
       }
 
@@ -96,8 +91,6 @@
     })
   );
 
-  let focusedCard = null;
-
   function updateHeaderTheme() {
     if (!header || !hero) {
       return;
@@ -108,60 +101,6 @@
     const progress = Math.min(1, Math.max(0, 1 - heroBottom / transitionDistance));
 
     header.style.setProperty("--header-theme", progress.toFixed(3));
-  }
-
-  function updateFocusedClient() {
-    if (prefersReducedMotion) {
-      return;
-    }
-
-    const viewportCenter = window.innerWidth / 2;
-    let nextFocusedCard = null;
-    let closestDistance = Infinity;
-
-    clientCards.forEach(function (card) {
-      const slideshow = card.querySelector(".client-card__slideshow");
-      if (!slideshow) {
-        return;
-      }
-
-      const rect = slideshow.getBoundingClientRect();
-      if (rect.right < 0 || rect.left > window.innerWidth) {
-        return;
-      }
-
-      const imageCenter = rect.left + rect.width / 2;
-      const distance = Math.abs(imageCenter - viewportCenter);
-
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        nextFocusedCard = card;
-      }
-    });
-
-    const focusLimit = window.innerWidth * FOCUS_THRESHOLD;
-    if (!nextFocusedCard || closestDistance > focusLimit) {
-      nextFocusedCard = null;
-    }
-
-    if (nextFocusedCard === focusedCard) {
-      return;
-    }
-
-    clientCards.forEach(function (card) {
-      const slideshow = slideshows.get(card);
-      const isFocused = card === nextFocusedCard;
-
-      card.classList.toggle("is-focused", isFocused);
-
-      if (isFocused) {
-        slideshow?.start();
-      } else {
-        slideshow?.stop();
-      }
-    });
-
-    focusedCard = nextFocusedCard;
   }
 
   function updateAboutVisibility() {
@@ -183,147 +122,50 @@
     aboutContent.classList.toggle("is-visible", ratio > 0.3);
   }
 
-  if (!scrollWrapper || !stickyPanel || !track) {
+  function onScroll() {
     updateHeaderTheme();
     updateAboutVisibility();
-    window.addEventListener("scroll", function () {
-      updateHeaderTheme();
-      updateAboutVisibility();
-    }, { passive: true });
-    return;
   }
 
-  function setTrackEdgePadding() {
-    const firstSlideshow = clientCards[0]?.querySelector(".client-card__slideshow");
-    if (!firstSlideshow || !track) {
-      return;
-    }
-
-    const viewportWidth = stickyPanel.clientWidth;
-    const imageWidth = firstSlideshow.offsetWidth;
-    const edgePadding = Math.max(0, (viewportWidth - imageWidth) / 2);
-
-    track.style.setProperty("--client-edge-padding", `${edgePadding}px`);
-  }
-
-  function getSlideshowCenterInTrack(slideshow) {
-    const trackLeft = track.getBoundingClientRect().left;
-    const slideshowRect = slideshow.getBoundingClientRect();
-
-    return slideshowRect.left - trackLeft + slideshowRect.width / 2;
-  }
-
-  let cachedMaxTranslate = 0;
-
-  function measureTrackScroll() {
-    setTrackEdgePadding();
-
-    const savedTransform = track.style.transform;
-    track.style.transform = "translateX(0)";
-
-    const viewportWidth = stickyPanel.clientWidth;
-    const lastSlideshow = clientCards[clientCards.length - 1]?.querySelector(".client-card__slideshow");
-
-    if (!lastSlideshow) {
-      cachedMaxTranslate = 0;
-    } else {
-      const lastCenter = getSlideshowCenterInTrack(lastSlideshow);
-      cachedMaxTranslate = Math.max(0, lastCenter - viewportWidth / 2);
-    }
-
-    track.style.transform = savedTransform;
-    scrollWrapper.style.height = `${window.innerHeight + cachedMaxTranslate}px`;
-  }
-
-  function setScrollHeight() {
-    measureTrackScroll();
-  }
-
-  function updateHorizontalScroll() {
-    updateHeaderTheme();
-
-    const rect = scrollWrapper.getBoundingClientRect();
-    const scrollableDistance = scrollWrapper.offsetHeight - window.innerHeight;
-
-    if (scrollableDistance <= 0) {
-      track.style.transform = "translateX(0)";
-      aboutText?.classList.remove("is-visible");
-      updateFocusedClient();
-      return;
-    }
-
-    const progress = Math.min(1, Math.max(0, -rect.top / scrollableDistance));
-
-    track.style.transform = `translateX(-${progress * cachedMaxTranslate}px)`;
-
-    if (aboutText) {
-      if (progress > 0.08) {
-        aboutText.classList.add("is-visible");
-      } else {
-        aboutText.classList.remove("is-visible");
-      }
-    }
-
-    updateFocusedClient();
-    updateAboutVisibility();
-  }
-
-  function init() {
-    setScrollHeight();
-    updateHeaderTheme();
-    updateAboutVisibility();
-
+  function initClientCards() {
     clientCards.forEach(function (card) {
+      const slideshow = slideshows.get(card);
+
       card.querySelectorAll(".client-card__slide:not(.is-active)").forEach(function (slide) {
         slide.setAttribute("aria-hidden", "true");
       });
-    });
 
-    if (prefersReducedMotion) {
-      track.style.transform = "translateX(0)";
-      aboutText?.classList.add("is-visible");
-      aboutContent?.classList.add("is-visible");
-      scrollWrapper.style.height = "auto";
-      stickyPanel.style.position = "relative";
-      stickyPanel.style.height = "auto";
-      stickyPanel.style.overflow = "visible";
-      track.style.flexWrap = "wrap";
-      track.style.justifyContent = "center";
-      track.style.paddingBlock = "3rem";
-      return;
-    }
-
-    updateHorizontalScroll();
-  }
-
-  let ticking = false;
-
-  function onScroll() {
-    if (prefersReducedMotion) {
-      return;
-    }
-
-    if (!ticking) {
-      window.requestAnimationFrame(function () {
-        updateHorizontalScroll();
-        ticking = false;
+      card.addEventListener("mouseenter", function () {
+        slideshow?.start();
       });
-      ticking = true;
-    }
+
+      card.addEventListener("mouseleave", function () {
+        slideshow?.stop();
+      });
+
+      card.addEventListener("focusin", function () {
+        slideshow?.start();
+      });
+
+      card.addEventListener("focusout", function (event) {
+        if (!card.contains(event.relatedTarget)) {
+          slideshow?.stop();
+        }
+      });
+    });
   }
 
-  let resizeTimer;
+  function init() {
+    updateHeaderTheme();
+    updateAboutVisibility();
+    initClientCards();
 
-  function onResize() {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () {
-      setScrollHeight();
-      updateHorizontalScroll();
-    }, 120);
+    if (prefersReducedMotion) {
+      aboutContent?.classList.add("is-visible");
+    }
   }
 
   window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", onResize);
 
   if (document.fonts?.ready) {
     document.fonts.ready.then(init);
