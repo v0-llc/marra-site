@@ -32,7 +32,7 @@
   --font-display: "Moderna", Georgia, serif;
   --font-body: "Desire", Georgia, serif;
 
-  --header-height: 4.5rem;
+  --header-height: 3.25rem;
   --space-xs: 0.5rem;
   --space-sm: 1rem;
   --space-md: 1.5rem;
@@ -140,12 +140,6 @@ h3 {
   transition:
     background-color 0.45s var(--ease-out),
     backdrop-filter 0.45s var(--ease-out);
-
-  &.site-header--light {
-    .site-nav__link:focus-visible {
-      outline-color: var(--color-forest-deep);
-    }
-  }
 }
 
 .site-nav {
@@ -159,15 +153,9 @@ h3 {
     font-size: clamp(0.75rem, 1.2vw, 0.875rem);
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: color-mix(
-      in srgb,
-      var(--color-cream) calc((1 - var(--header-theme)) * 100%),
-      var(--color-forest-deep)
-    );
+    color: var(--color-forest-deep);
     opacity: 0.85;
-    transition:
-      color 0.45s var(--ease-out),
-      opacity var(--transition-base);
+    transition: opacity var(--transition-base);
 
     &:hover,
     &:focus-visible {
@@ -175,7 +163,7 @@ h3 {
     }
 
     &:focus-visible {
-      outline: 1px solid var(--color-cream);
+      outline: 1px solid var(--color-forest-deep);
       outline-offset: 4px;
     }
   }
@@ -184,6 +172,30 @@ h3 {
 /* ------------------------------------------------------------------ */
 /* Hero                                                               */
 /* ------------------------------------------------------------------ */
+
+@keyframes hero-image-focus {
+  from {
+    filter: blur(14px);
+    transform: scale(1.04);
+  }
+
+  to {
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+@keyframes hero-logo-rise {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 .hero {
   position: relative;
@@ -211,9 +223,9 @@ h3 {
     inset: 0;
     background: linear-gradient(
       180deg,
-      rgb(29 38 18 / 0.45) 0%,
-      rgb(29 38 18 / 0.25) 40%,
-      rgb(29 38 18 / 0.55) 100%
+      rgb(245 239 225 / 0.4) 0%,
+      rgb(245 239 225 / 0.12) 45%,
+      rgb(245 239 225 / 0.3) 100%
     );
   }
 
@@ -230,12 +242,22 @@ h3 {
   .hero__logo {
     width: 100%;
     height: auto;
-    filter: drop-shadow(0 8px 32px rgb(0 0 0 / 0.35));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero__image {
+    animation: hero-image-focus 3s var(--ease-out) both;
+  }
+
+  .hero__logo {
+    opacity: 0;
+    animation: hero-logo-rise 2.1s var(--ease-out) 0.15s both;
   }
 }
 
 /* ------------------------------------------------------------------ */
-/* Clients ù horizontal scroll section                                */
+/* Clients ? horizontal scroll section                                */
 /* ------------------------------------------------------------------ */
 
 .clients {
@@ -340,13 +362,14 @@ h3 {
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: clamp(2rem, 6vw, 4rem);
+  padding-block: calc(var(--header-height) + var(--space-md));
+  padding-inline: clamp(1.5rem, 5vw, 3rem);
   background-color: var(--color-burgundy);
   color: var(--color-cream);
 
   .about__content {
     max-width: min(42rem, 88vw);
-    text-align: center;
+    /* text-align: center; */
     opacity: 0;
     transition: opacity 0.6s var(--ease-out);
 
@@ -360,13 +383,18 @@ h3 {
     font-size: clamp(2rem, 5vw, 3.5rem);
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    text-align: center;
   }
 
   .about__text {
     margin: 0;
-    font-size: clamp(1rem, 1.8vw, 1.2rem);
+    /* font-size: clamp(1rem, 1.8vw, 1.2rem); */
     line-height: 1.75;
     opacity: 0.9;
+
+    & + .about__text {
+      margin-top: 1.25em;
+    }
   }
 
   .about__icon {

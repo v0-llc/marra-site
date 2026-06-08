@@ -108,7 +108,6 @@
     const progress = Math.min(1, Math.max(0, 1 - heroBottom / transitionDistance));
 
     header.style.setProperty("--header-theme", progress.toFixed(3));
-    header.classList.toggle("site-header--light", progress > 0.5);
   }
 
   function updateFocusedClient() {
