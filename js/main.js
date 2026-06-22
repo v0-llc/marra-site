@@ -7,6 +7,8 @@
   const hero = document.querySelector(".hero");
   const aboutSection = document.querySelector(".about");
   const aboutContent = document.querySelector(".about__content");
+  const footer = document.querySelector(".site-footer");
+  const contactChip = document.querySelector(".contact-chip");
   const yearEl = document.getElementById("year");
   const clientCards = Array.from(document.querySelectorAll(".client-card"));
 
@@ -122,9 +124,42 @@
     aboutContent.classList.toggle("is-visible", ratio > 0.3);
   }
 
+  function getContactEdgePx() {
+    return Math.min(Math.max(16, window.innerWidth * 0.03), 28);
+  }
+
+  function getContactChipRestOffset() {
+    if (!contactChip) {
+      return 0;
+    }
+
+    const chipWidth = contactChip.offsetWidth;
+    const edge = getContactEdgePx();
+    const chipCenterWhenRight = window.innerWidth - edge - chipWidth / 2;
+
+    return chipCenterWhenRight - window.innerWidth / 2;
+  }
+
+  function updateContactChip() {
+    if (!contactChip || !footer) {
+      return;
+    }
+
+    const footerTop = footer.getBoundingClientRect().top;
+    const atBottom = footerTop <= window.innerHeight * 0.92;
+    const restOffset = getContactChipRestOffset();
+
+    contactChip.classList.toggle("contact-chip--centered", atBottom);
+    contactChip.style.setProperty(
+      "--contact-x-offset",
+      atBottom ? "0px" : `${restOffset}px`
+    );
+  }
+
   function onScroll() {
     updateHeaderTheme();
     updateAboutVisibility();
+    updateContactChip();
   }
 
   function initClientCards() {
@@ -158,6 +193,7 @@
   function init() {
     updateHeaderTheme();
     updateAboutVisibility();
+    updateContactChip();
     initClientCards();
 
     if (prefersReducedMotion) {
@@ -166,6 +202,7 @@
   }
 
   window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", updateContactChip);
 
   if (document.fonts?.ready) {
     document.fonts.ready.then(init);
