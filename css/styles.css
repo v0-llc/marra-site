@@ -417,8 +417,9 @@ h3 {
 /* ------------------------------------------------------------------ */
 
 .site-footer {
-  background-color: var(--color-forest-deep);
-  color: var(--color-cream);
+  background-color: var(--color-cream);
+  color: var(--color-forest-deep);
+  border-top: 1px solid color-mix(in srgb, var(--color-sand) 55%, transparent);
   padding: clamp(2.25rem, 6vw, 4rem) clamp(1.5rem, 5vw, 3rem);
   min-height: clamp(9rem, 18vh, 12rem);
 
@@ -475,7 +476,7 @@ h3 {
     }
 
     &:focus-visible {
-      outline: 1px solid var(--color-cream);
+      outline: 1px solid var(--color-forest-deep);
       outline-offset: 4px;
     }
   }
@@ -484,7 +485,7 @@ h3 {
     margin: 0;
     font-size: 0.85rem;
     letter-spacing: 0.04em;
-    opacity: 0.55;
+    opacity: 0.8;
 
     @media (min-width: 48rem) {
       justify-self: end;
