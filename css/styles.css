@@ -275,19 +275,14 @@ h3 {
   overflow-x: clip;
 
   .clients__grid {
-    column-count: 4;
-    column-width: 1px;
-    column-gap: var(--client-grid-gap);
+    position: relative;
   }
 }
 
 .client-card {
-  display: inline-block;
   width: 100%;
   position: relative;
   contain: inline-size;
-  break-inside: avoid;
-  margin-bottom: var(--client-grid-gap);
   min-width: 0;
 
   &:hover,

@@ -10,7 +10,22 @@
   const footer = document.querySelector(".site-footer");
   const contactChip = document.querySelector(".contact-chip");
   const yearEl = document.getElementById("year");
+  const clientsGrid = document.querySelector(".clients__grid");
   const clientCards = Array.from(document.querySelectorAll(".client-card"));
+  const clientColumnsDesktop = window.matchMedia("(min-width: 64rem)");
+  const clientColumnsTablet = window.matchMedia("(min-width: 40rem)");
+
+  function getClientColumnCount() {
+    if (clientColumnsDesktop.matches) {
+      return 4;
+    }
+
+    if (clientColumnsTablet.matches) {
+      return 2;
+    }
+
+    return 1;
+  }
 
   if (yearEl) {
     yearEl.textContent = String(new Date().getFullYear());
@@ -162,6 +177,58 @@
     updateContactChip();
   }
 
+  function getClientGridGap() {
+    const probe = document.createElement("div");
+    probe.style.display = "grid";
+    probe.style.gap = "var(--client-grid-gap)";
+    probe.style.visibility = "hidden";
+    probe.style.position = "absolute";
+    document.body.appendChild(probe);
+    const gap = Number.parseFloat(getComputedStyle(probe).gap) || 0;
+    probe.remove();
+    return gap;
+  }
+
+  function layoutClientsMasonry() {
+    if (!clientsGrid || clientCards.length === 0) {
+      return;
+    }
+
+    const gap = getClientGridGap();
+    const gridWidth = clientsGrid.clientWidth;
+
+    if (gridWidth <= 0) {
+      return;
+    }
+
+    const columns = getClientColumnCount();
+    const colWidth = (gridWidth - gap * (columns - 1)) / columns;
+    const colHeights = new Array(columns).fill(0);
+
+    clientCards.forEach(function (card, index) {
+      const col = index % columns;
+      const left = col * (colWidth + gap);
+
+      card.style.position = "absolute";
+      card.style.width = `${colWidth}px`;
+      card.style.left = `${left}px`;
+      card.style.top = `${colHeights[col]}px`;
+
+      colHeights[col] += card.offsetHeight + gap;
+    });
+
+    const maxHeight = Math.max(...colHeights);
+    clientsGrid.style.height = `${Math.max(0, maxHeight - gap)}px`;
+  }
+
+  let masonryResizeTimer;
+
+  function scheduleClientsMasonryLayout() {
+    window.requestAnimationFrame(function () {
+      layoutClientsMasonry();
+    });
+  }
+
   function initClientCards() {
     // Keep the first "featured" image visible.
     // We intentionally disable the hover slideshow swap effect.
@@ -171,14 +238,20 @@
         .forEach(function (slide) {
           slide.setAttribute("aria-hidden", "true");
         });
+
+      const image = card.querySelector(".client-card__slide.is-active");
+      if (image && !image.complete) {
+        image.addEventListener("load", scheduleClientsMasonryLayout, { once: true });
+      }
     });
   }
 
   function init() {
+    initClientCards();
+    scheduleClientsMasonryLayout();
     updateHeaderTheme();
     updateAboutVisibility();
     updateContactChip();
-    initClientCards();
 
     if (prefersReducedMotion) {
       aboutContent?.classList.add("is-visible");
@@ -186,7 +259,13 @@
   }
 
   window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", updateContactChip);
+  window.addEventListener("resize", function () {
+    clearTimeout(masonryResizeTimer);
+    masonryResizeTimer = window.setTimeout(function () {
+      scheduleClientsMasonryLayout();
+      updateContactChip();
+    }, 120);
+  });
 
   if (document.fonts?.ready) {
     document.fonts.ready.then(init);
