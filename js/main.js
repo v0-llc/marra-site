@@ -163,30 +163,14 @@
   }
 
   function initClientCards() {
+    // Keep the first "featured" image visible.
+    // We intentionally disable the hover slideshow swap effect.
     clientCards.forEach(function (card) {
-      const slideshow = slideshows.get(card);
-
-      card.querySelectorAll(".client-card__slide:not(.is-active)").forEach(function (slide) {
-        slide.setAttribute("aria-hidden", "true");
-      });
-
-      card.addEventListener("mouseenter", function () {
-        slideshow?.start();
-      });
-
-      card.addEventListener("mouseleave", function () {
-        slideshow?.stop();
-      });
-
-      card.addEventListener("focusin", function () {
-        slideshow?.start();
-      });
-
-      card.addEventListener("focusout", function (event) {
-        if (!card.contains(event.relatedTarget)) {
-          slideshow?.stop();
-        }
-      });
+      card
+        .querySelectorAll(".client-card__slide:not(.is-active)")
+        .forEach(function (slide) {
+          slide.setAttribute("aria-hidden", "true");
+        });
     });
   }
 

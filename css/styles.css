@@ -307,7 +307,11 @@ h3 {
     height: auto;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.35s var(--ease-out);
+    filter: grayscale(1) contrast(0.7) brightness(0.92);
+    transition:
+      opacity 0.35s var(--ease-out),
+      filter 0.4s var(--ease-out),
+      transform 0.8s var(--ease-out);
 
     &.is-active {
       opacity: 1;
@@ -334,6 +338,21 @@ h3 {
     &.is-active:not(:first-of-type) {
       z-index: 2;
     }
+  }
+
+  &:hover .client-card__slide.is-active,
+  &:focus-within .client-card__slide.is-active {
+    filter: grayscale(0) contrast(1.05) brightness(1);
+  }
+
+  &:hover .client-card__slide.is-active:first-of-type,
+  &:focus-within .client-card__slide.is-active:first-of-type {
+    transform: scale(1.06);
+  }
+
+  &:hover .client-card__slide.is-active:not(:first-of-type),
+  &:focus-within .client-card__slide.is-active:not(:first-of-type) {
+    transform: translate(-50%, -50%) scale(1.06);
   }
 
   .client-card__name {
