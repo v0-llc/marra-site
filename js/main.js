@@ -206,7 +206,11 @@
     const colHeights = new Array(columns).fill(0);
 
     clientCards.forEach(function (card, index) {
-      const col = index % columns;
+      const preferredCol = card.dataset.col;
+      const col =
+        preferredCol != null
+          ? Number.parseInt(preferredCol, 10) % columns
+          : index % columns;
       const left = col * (colWidth + gap);
 
       card.style.position = "absolute";
